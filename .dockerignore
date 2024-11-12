@@ -1,0 +1,6 @@
+node_modules
+dist
+.github
+Dockerfile*
+docker-compose*
+README.md
