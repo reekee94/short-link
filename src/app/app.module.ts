@@ -17,8 +17,9 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
     CacheModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         store: redisStore,
-        host: configService.get('REDIS_HOST', 'localhost'),
-        port: configService.get('REDIS_PORT', 6379),
+        // host: configService.get('REDIS_HOST', 'localhost'),
+        // port: configService.get('REDIS_PORT', 6379),
+        url: configService.get('REDIS_URL'),
         ttl: 60, // in seconds
       }),
       inject: [ConfigService],
