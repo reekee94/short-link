@@ -1,27 +1,40 @@
-version: "3.3"
+version: '1.0'
+
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: url_shortener_app
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MONGODB_URI=${MONGODB_URI}
-    depends_on:
-      - redis
+  mongo:
+    image: mongo:4.4
     ports:
-      - "3000:3000"
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: mydatabase
+    volumes:
+      - mongo-data:/data/db
 
   redis:
-    image: redis:6.0.7
-    container_name: redis
-    restart: always
-    volumes:
-      - redis_volume_data:/data
+    image: redis:6.2
     ports:
       - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
+  app:
+    build:
+      dockerfile: AppDockerfile
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./src:/app/src
+    command: bash -c "npm run start"
 
 volumes:
-  redis_volume_data:
+  pg-data:
+  mongo-data:
+  redis-data:

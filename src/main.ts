@@ -15,8 +15,8 @@ async function bootstrap() {
 
 
   const config = new DocumentBuilder()
-    .setTitle('Diamore Bot API Documentation')
-    .setDescription('API documentation for Diamore Bot API')
+    .setTitle('Test task API Documentation')
+    .setDescription('API documentation for Test task Bot API')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
