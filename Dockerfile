@@ -3,8 +3,8 @@ FROM node:18.20-alpine AS base
 FROM base AS build
 WORKDIR /build
 
-COPY package*.json yarn.lock ./
-RUN yarn install
+COPY package*.json ./
+RUN npm install
 
 COPY . .
 ARG NODE_ENV=production
