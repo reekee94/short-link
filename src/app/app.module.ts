@@ -20,7 +20,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
         // host: configService.get('REDIS_HOST', 'localhost'),
         // port: configService.get('REDIS_PORT', 6379),
         url: configService.get('REDIS_URL'),
-        ttl: 60, // in seconds
+        ttl: 5, // in seconds
       }),
       inject: [ConfigService],
       isGlobal: true,
