@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Param, Redirect, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ShortenerService } from './shortener.service';
 import { createDto } from './dto/Create.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
@@ -18,13 +18,12 @@ export class ShortenerController {
   }
 
   @Get(':code')
-  @Redirect()
   @ApiOperation({ summary: 'Redirect to the original URL' })
   @ApiParam({ name: 'code', description: 'The short code for the URL' })
   @ApiResponse({ status: 301, description: 'Redirects to the original URL.' })
   @ApiResponse({ status: 404, description: 'Short code not found' })
   async redirect(@Param('code') code: string) {
-    const link = await this.shortenerService.GetLink(code);
+    const link = await this.shortenerService.getLink(code);
     return { url: link };
   }
 

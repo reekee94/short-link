@@ -57,7 +57,7 @@ describe('ShortenerService', () => {
   it('should return the original URL if found in Redis cache', async () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockLink.Original);
 
-    const result = await service.GetLink(mockLink.shortCode);
+    const result = await service.getLink(mockLink.shortCode);
     expect(result).toBe(mockLink.Original); // Should return the original URL
   });
 
@@ -65,7 +65,7 @@ describe('ShortenerService', () => {
     jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(null); // Cache miss
     jest.spyOn(model, 'findOne').mockResolvedValueOnce(null); // Not found in DB either
 
-    await expect(service.GetLink(mockLink.shortCode)).rejects.toThrow(NotFoundException);
+    await expect(service.getLink(mockLink.shortCode)).rejects.toThrow(NotFoundException);
   });
 
   it('should increment usage times for the link', async () => {

@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ShortenerService {
-    private readonly baseUrl = "http://localhost:3000/shortener";
     private readonly cacheTtl = 3600; // Cache expiration in seconds (1 hour)
 
     constructor(
@@ -16,21 +15,18 @@ export class ShortenerService {
         @Inject(CACHE_MANAGER) private readonly redis: Cache
     ) {}
 
-    // Create or retrieve a shortened link
     async create(createDto: createDto): Promise<string> {
-        // Check if the URL already has a short code
         const existingLink = await this.linkModel.findOne({ original: createDto.original });
         
         if (existingLink) {
             await this.cacheUrl(existingLink.shortCode, existingLink.original);
-            return `${this.baseUrl}/${existingLink.shortCode}`;
+            return existingLink.shortCode;
         }
 
         const shortCode = uuidv4().slice(0, 6);
 
         await this.cacheUrl(shortCode, createDto.original);
 
-        // Store in MongoDB
         const newLink = new this.linkModel({
             ...createDto,
             shortCode,
@@ -38,27 +34,23 @@ export class ShortenerService {
         });
 
         await newLink.save();
-        return `${this.baseUrl}/${shortCode}`;
+        return shortCode;
     }
 
-    // Retrieve the original URL by short code
-    async GetLink(shortCode: string): Promise<string> {
-        // Check Redis cache first
+    async getLink(shortCode: string): Promise<string> {
+
         const cachedLink = await this.redis.get<string>(shortCode);
 
         if (cachedLink) {
-            // Increment click count in MongoDB
             await this.incrementClickCount(shortCode);
             return cachedLink;
         }
 
-        // Fallback to MongoDB if not in cache
-        const document = await this.linkModel.findOne({ shortCode });
+        const document = await this.linkModel.findOne({ shortCode }).exec();
         if (!document) {
             throw new NotFoundException('Link not found');
         }
 
-        // Cache the URL and increment click count
         await this.cacheUrl(shortCode, document.original);
         await this.incrementClickCount(shortCode);
         return document.original;
@@ -69,7 +61,7 @@ export class ShortenerService {
         await this.linkModel.updateOne({ shortCode }, { $inc: { usageTimes: 1 } });
     }
 
-    // Get usage statistics for a given short code
+
     async getStatistic(shortCode: string): Promise<string> {
         const document = await this.linkModel.findOne({ shortCode });
         if (!document) {
@@ -78,7 +70,6 @@ export class ShortenerService {
         return `This link was used ${document.usageTimes} times.`;
     }
 
-    // Helper to cache URL in Redis
     private async cacheUrl(shortCode: string, url: string): Promise<void> {
         const cached = await this.redis.get(shortCode);
         if (!cached) {
